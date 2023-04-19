@@ -1,5 +1,6 @@
 using Elasticsearch.Net;
 using Nest;
+using System.Text.Json;
 using iot_cloud_service_api.Interfaces;
 using iot_cloud_service_api.Services;
 
@@ -24,6 +25,8 @@ builder.Services
     .AddSingleton<IElasticClient>(elasticClient)
     .AddSingleton<IElasticService, ElasticService>();
 
+// Extract API keys from config to hashset for faster lookups
+var allowedApiKeys = new HashSet<string>(builder.Configuration.GetSection("ApiKeys").Get<string[]>());
 
 var app = builder.Build();
 
@@ -37,6 +40,24 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Check API-key header and return 401 if invalid
+app.Use(async (context, next) =>
+{
+    var apiKey = context.Request.Headers["X-Api-Key"].FirstOrDefault();
+
+    if (string.IsNullOrEmpty(apiKey) || !allowedApiKeys.Contains(apiKey))
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(JsonSerializer.Serialize(new { message = "Invalid API Key" }));
+    }
+    else
+    {
+        await next();
+    }
+});
+
 
 app.UseAuthorization();
 
