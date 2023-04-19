@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../buildMultiTargeting/iot-cloud-service-api.props" />
+</Project>
