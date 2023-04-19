@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using iot_cloud_service_api.Interfaces;
+using iot_cloud_service_api.Models;
+
 
 namespace iot_cloud_service_api.Controllers;
 
@@ -24,8 +26,16 @@ public class TempDataController : ControllerBase
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> Add([FromBody] string value)
+    public async Task<IActionResult> Add([FromBody] TempData tempData)
     {
-        return Ok(new { message = "Tempdata API" });
+        try
+        {
+            await _elasticService.AddAsync(tempData);
+            return StatusCode(201);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 }

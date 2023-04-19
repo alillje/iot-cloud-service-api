@@ -44,6 +44,22 @@ namespace iot_cloud_service_api.Services
             }
         }
 
+        public async Task AddAsync(TempData tempData)
+        {
+            var index = "tempdata";
+
+            // Index the TempData document in Elasticsearch
+            var indexResponse = await _elasticClient.IndexAsync(tempData, i => i
+                .Index(index)
+            );
+
+            // Check if the index operation was successful
+            if (!indexResponse.IsValid)
+            {
+                throw new Exception($"Failed to index data in Elasticsearch. Error: {indexResponse.OriginalException?.Message}");
+            }
+        }
+
 
     }
 }
