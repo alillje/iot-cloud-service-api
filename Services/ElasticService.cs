@@ -58,7 +58,7 @@ namespace iot_cloud_service_api.Services
             {
                 throw new Exception($"Failed to index data in Elasticsearch. Error: {indexResponse.OriginalException?.Message}");
             }
-            Console.Write("Successfullt inserted data in Elasticsearch.");
+            Console.Write("Successfully inserted data in Elasticsearch.");
         }
 
 
