@@ -90,6 +90,58 @@ namespace iot_cloud_service_api.Services
                 throw new Exception($"Failed to get data from Elasticsearch. Error: {searchResponse.OriginalException?.Message}");
             }
         }
+        // Get daily average data
+        public async Task<Dictionary<DateTime, double>> GetAverageDayTempData(int days = 10)
+        {
+            var index = "tempdata";
 
+            // Get the date for 10 days ago
+            DateTime tenDaysAgo = DateTime.UtcNow.Date.AddDays(-days);
+
+            // Create the date histogram aggregation and average aggregation
+            // Perform the search with aggregation
+            var searchResponse = await _elasticClient.SearchAsync<TempData>(s => s
+                .Index(index)
+                .Query(q => q
+                    .DateRange(r => r
+                        .Field(f => f.Timestamp)
+                        .GreaterThanOrEquals(tenDaysAgo)
+                        .LessThanOrEquals(DateTime.UtcNow)
+                    )
+                )
+                .Size(0)
+                .Aggregations(a => a
+                    .DateHistogram("daily_buckets", dh => dh
+                        .Field(f => f.Timestamp)
+                        .CalendarInterval(DateInterval.Day)
+                        .ExtendedBounds(tenDaysAgo, DateTime.UtcNow)
+                        .Aggregations(aa => aa
+                            .Average("daily_avg_temperature", avg => avg
+                                .Field(f => f.Temperature)
+                            )
+                        )
+                    )
+                ));
+
+            // Check if the search request was successful
+            if (searchResponse.IsValid)
+            {
+                var dailyAverages = new Dictionary<DateTime, double>();
+
+                // Extract the average temperatures from the aggregation results
+                var dateHistogram = searchResponse.Aggregations.DateHistogram("daily_buckets");
+                foreach (var dailyBucket in dateHistogram.Buckets)
+                {
+                    var avgTemperature = dailyBucket.Average("daily_avg_temperature");
+                    dailyAverages.Add(dailyBucket.Date, avgTemperature.Value ?? 0);
+                }
+
+                return dailyAverages;
+            }
+            else
+            {
+                throw new Exception($"Failed to get data from Elasticsearch. Error: {searchResponse.OriginalException?.Message}");
+            }
+        }
     }
 }
