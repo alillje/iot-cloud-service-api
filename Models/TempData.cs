@@ -10,7 +10,7 @@ namespace iot_cloud_service_api.Models;
         [JsonPropertyName("temperature")]
         public double Temperature { get; set; }
 
-        [JsonPropertyName("humitidy")]
+        [JsonPropertyName("humidity")]
         public double Humidity { get; set; }
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }

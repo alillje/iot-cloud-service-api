@@ -28,6 +28,9 @@ public class TempDataController : ControllerBase
     [HttpPost("")]
     public async Task<IActionResult> Add([FromBody] TempData tempData)
     {
+            Console.WriteLine(tempData.Temperature);
+            Console.WriteLine(tempData.Humidity);
+            Console.WriteLine(tempData.Timestamp);
         try
         {
             await _elasticService.AddAsync(tempData);
