@@ -61,6 +61,35 @@ namespace iot_cloud_service_api.Services
             Console.Write("Successfully inserted data in Elasticsearch.");
         }
 
+        /// Gets the latest tempdata object
+        public async Task<TempData> GetLatestAsync()
+        {
+            var index = "tempdata";
+            var query = new Func<QueryContainerDescriptor<TempData>, QueryContainer>(q => q
+                .MatchAll()
+            );
+
+            // Construct the Elasticsearch search request using the provided index and query, and sort by timestamp in descending order
+            var searchResponse = await _elasticClient.SearchAsync<TempData>(s => s
+                .Index(index)
+                .Query(query)
+                .Size(1)
+                .Sort(ss => ss
+                    .Descending(t => t.Timestamp)
+                )
+            );
+
+            // Check if the search request was successful
+            if (searchResponse.IsValid)
+            {
+                // Return the first document retrieved from Elasticsearch (which is the latest one)
+                return searchResponse.Documents.First();
+            }
+            else
+            {
+                throw new Exception($"Failed to get data from Elasticsearch. Error: {searchResponse.OriginalException?.Message}");
+            }
+        }
 
     }
 }

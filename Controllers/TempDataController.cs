@@ -25,6 +25,14 @@ public class TempDataController : ControllerBase
         return Ok(response);
     }
 
+        [HttpGet("current")]
+    public async Task<IActionResult> GetCurrentTempData()
+    {
+        var response = await _elasticService.GetLatestAsync();
+        return Ok(response);
+    }
+
+
     [HttpPost("")]
     public async Task<IActionResult> Add([FromBody] TempData tempData)
     {
