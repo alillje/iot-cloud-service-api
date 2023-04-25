@@ -100,6 +100,7 @@ namespace iot_cloud_service_api.Services
 
             // Perform the search with aggregation
             // Search between the given period
+            // Add aggregations for both temperature and humidity
             var searchResponse = await _elasticClient.SearchAsync<TempData>(s => s
                 .Index(index)
                 .Size(0)
@@ -129,6 +130,7 @@ namespace iot_cloud_service_api.Services
             {
                 // var tempAverage = new Dictionary<DateTime, double>();
                 // var humidityAverage = new Dictionary<DateTime, double>();
+                // Create dictionary to store all average periodical data
                 var averages = new Dictionary<DateTime, Dictionary<String, double>>();
 
                 // Extract the average temperatures from the aggregation results
@@ -136,6 +138,7 @@ namespace iot_cloud_service_api.Services
                 
                 foreach (var dailyBucket in dateHistogram.Buckets)
                 {
+                    // Create dictionary to store average temperature and humidity for each period
                     var tempDataAverage = new Dictionary<String, double>();
 
                     var avgTemperature = dailyBucket.Average("period_temp_avg");
@@ -143,6 +146,7 @@ namespace iot_cloud_service_api.Services
 
                     // tempAverage.Add(dailyBucket.Date, avgTemperature.Value ?? 0);
                     // humidityAverage.Add(dailyBucket.Date, avgHumidity.Value ?? 0);
+                    // Add the dictionary of current averages to the dictionary of all averages
                     tempDataAverage.Add("temperature", avgTemperature.Value ?? 0);
                     tempDataAverage.Add("humidity", avgHumidity.Value ?? 0);
                     averages.Add(dailyBucket.Date, tempDataAverage);
