@@ -91,37 +91,30 @@ namespace iot_cloud_service_api.Services
             }
         }
         // Get daily average data
-        public async Task<Dictionary<DateTime, double>> GetAverageDayTempData(int days = 10)
+        public async Task<Dictionary<DateTime, double>> GetAverageTempData(int period = 10, bool hour = false)
         {
             var index = "tempdata";
-
             // Get the date for 10 days ago
-            DateTime tenDaysAgo = DateTime.UtcNow.Date.AddDays(-days);
+            DateTime tenPeriodsAgo = DateTime.UtcNow.Date.AddDays(-period);
 
             // Create the date histogram aggregation and average aggregation
             // Perform the search with aggregation
             var searchResponse = await _elasticClient.SearchAsync<TempData>(s => s
                 .Index(index)
-                .Query(q => q
-                    .DateRange(r => r
-                        .Field(f => f.Timestamp)
-                        .GreaterThanOrEquals(tenDaysAgo)
-                        .LessThanOrEquals(DateTime.UtcNow)
-                    )
-                )
-                .Size(0)
-                .Aggregations(a => a
-                    .DateHistogram("daily_buckets", dh => dh
-                        .Field(f => f.Timestamp)
-                        .CalendarInterval(DateInterval.Day)
-                        .ExtendedBounds(tenDaysAgo, DateTime.UtcNow)
-                        .Aggregations(aa => aa
-                            .Average("daily_avg_temperature", avg => avg
-                                .Field(f => f.Temperature)
-                            )
-                        )
-                    )
-                ));
+          .Index(index)
+          .Size(0)
+          .Aggregations(a => a
+              .DateHistogram("period_average", dh => dh
+                  .Field(f => f.Timestamp)
+                  .CalendarInterval(hour ? DateInterval.Day : DateInterval.Day)
+                  .Aggregations(aa => aa
+                      .Average("period_temp_avg", avg => avg
+                          .Field(f => f.Temperature)
+                      )
+                  )
+              )
+          )
+      );
 
             // Check if the search request was successful
             if (searchResponse.IsValid)
@@ -129,18 +122,17 @@ namespace iot_cloud_service_api.Services
                 var dailyAverages = new Dictionary<DateTime, double>();
 
                 // Extract the average temperatures from the aggregation results
-                var dateHistogram = searchResponse.Aggregations.DateHistogram("daily_buckets");
+                var dateHistogram = searchResponse.Aggregations.DateHistogram("period_average");
                 foreach (var dailyBucket in dateHistogram.Buckets)
                 {
-                    var avgTemperature = dailyBucket.Average("daily_avg_temperature");
+                    var avgTemperature = dailyBucket.Average("period_temp_avg");
                     dailyAverages.Add(dailyBucket.Date, avgTemperature.Value ?? 0);
                 }
-
                 return dailyAverages;
             }
             else
             {
-                throw new Exception($"Failed to get data from Elasticsearch. Error: {searchResponse.OriginalException?.Message}");
+                throw new Exception($"Failed to get average temp data from Elasticsearch. Error: {searchResponse.OriginalException?.Message}");
             }
         }
     }
