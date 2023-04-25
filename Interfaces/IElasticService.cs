@@ -10,7 +10,7 @@ namespace iot_cloud_service_api.Interfaces
         public Task<IEnumerable<TempData>> GetAsync();
         public Task AddAsync(TempData tempData);
         public Task<TempData> GetLatestAsync();
-        public Task<Dictionary<DateTime, double>> GetAverageTempData(int days, bool hour);
+        public Task<Dictionary<DateTime, double>> GetAverageTempData(int days);
 
 
     }

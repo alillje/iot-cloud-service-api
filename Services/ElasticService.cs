@@ -91,7 +91,7 @@ namespace iot_cloud_service_api.Services
             }
         }
         // Get daily average data
-        public async Task<Dictionary<DateTime, double>> GetAverageTempData(int period = 10, bool hour = false)
+        public async Task<Dictionary<DateTime, double>> GetAverageTempData(int period = 10)
         {
             var index = "tempdata";
             // Get the date for 10 days ago
@@ -101,20 +101,19 @@ namespace iot_cloud_service_api.Services
             // Perform the search with aggregation
             var searchResponse = await _elasticClient.SearchAsync<TempData>(s => s
                 .Index(index)
-          .Index(index)
-          .Size(0)
-          .Aggregations(a => a
-              .DateHistogram("period_average", dh => dh
-                  .Field(f => f.Timestamp)
-                  .CalendarInterval(hour ? DateInterval.Hour : DateInterval.Day)
-                  .Aggregations(aa => aa
-                      .Average("period_temp_avg", avg => avg
-                          .Field(f => f.Temperature)
-                      )
-                  )
-              )
-          )
-      );
+                .Size(0)
+                .Aggregations(a => a
+                    .DateHistogram("day_average", dh => dh
+                        .Field(f => f.Timestamp)
+                        .CalendarInterval(DateInterval.Day)
+                        .Aggregations(aa => aa
+                            .Average("day_temp_avg", avg => avg
+                                .Field(f => f.Temperature)
+                            )
+                        )
+                    )
+                )
+            );
 
             // Check if the search request was successful
             if (searchResponse.IsValid)
@@ -122,10 +121,11 @@ namespace iot_cloud_service_api.Services
                 var dailyAverages = new Dictionary<DateTime, double>();
 
                 // Extract the average temperatures from the aggregation results
-                var dateHistogram = searchResponse.Aggregations.DateHistogram("period_average");
+                var dateHistogram = searchResponse.Aggregations.DateHistogram("day_average");
                 foreach (var dailyBucket in dateHistogram.Buckets)
                 {
-                    var avgTemperature = dailyBucket.Average("period_temp_avg");
+                    Console.WriteLine("Datehistogram bucket: " + dailyBucket.Count);
+                    var avgTemperature = dailyBucket.Average("day_temp_avg");
                     dailyAverages.Add(dailyBucket.Date, avgTemperature.Value ?? 0);
                 }
                 return dailyAverages;
