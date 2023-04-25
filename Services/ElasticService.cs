@@ -106,7 +106,7 @@ namespace iot_cloud_service_api.Services
           .Aggregations(a => a
               .DateHistogram("period_average", dh => dh
                   .Field(f => f.Timestamp)
-                  .CalendarInterval(hour ? DateInterval.Day : DateInterval.Day)
+                  .CalendarInterval(hour ? DateInterval.Hour : DateInterval.Day)
                   .Aggregations(aa => aa
                       .Average("period_temp_avg", avg => avg
                           .Field(f => f.Temperature)
