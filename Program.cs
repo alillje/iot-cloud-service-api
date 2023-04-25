@@ -23,7 +23,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services
     .AddSingleton<IElasticClient>(elasticClient)
-    .AddSingleton<IElasticService, ElasticService>();
+    .AddScoped<IElasticService, ElasticService>();
 
 // Extract API keys from config to hashset for faster lookups
 var allowedApiKeys = new HashSet<string>(builder.Configuration.GetSection("ApiKeys").Get<string[]>());
