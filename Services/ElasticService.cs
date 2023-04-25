@@ -95,17 +95,23 @@ namespace iot_cloud_service_api.Services
         {
             var index = "tempdata";
             // Get the date for 10 days ago
-            DateTime tenPeriodsAgo = DateTime.UtcNow.Date.AddDays(-period);
+            DateTime sinceTime = DateTime.UtcNow.Date.AddDays(-period);
+            Console.Write(sinceTime.ToString());
 
             // Create the date histogram aggregation and average aggregation
             // Perform the search with aggregation
             var searchResponse = await _elasticClient.SearchAsync<TempData>(s => s
                 .Index(index)
                 .Size(0)
+                .Query(q => q.DateRange(r => r
+                    .Field(f => f.Timestamp)
+                    .GreaterThanOrEquals(sinceTime)
+                ))
                 .Aggregations(a => a
                     .DateHistogram("day_average", dh => dh
                         .Field(f => f.Timestamp)
                         .CalendarInterval(DateInterval.Day)
+                        .ExtendedBounds(sinceTime, DateTime.UtcNow)
                         .Aggregations(aa => aa
                             .Average("day_temp_avg", avg => avg
                                 .Field(f => f.Temperature)
@@ -122,6 +128,7 @@ namespace iot_cloud_service_api.Services
 
                 // Extract the average temperatures from the aggregation results
                 var dateHistogram = searchResponse.Aggregations.DateHistogram("day_average");
+                
                 foreach (var dailyBucket in dateHistogram.Buckets)
                 {
                     Console.WriteLine("Datehistogram bucket: " + dailyBucket.Count);

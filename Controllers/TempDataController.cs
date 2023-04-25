@@ -35,7 +35,7 @@ public class TempDataController : ControllerBase
     [HttpGet("day-average")]
     public async Task<IActionResult> GetDailyAverage()
     {
-        var response = await _elasticService.GetAverageTempData(3);
+        var response = await _elasticService.GetAverageTempData(5);
         return Ok(response);
     }
 
