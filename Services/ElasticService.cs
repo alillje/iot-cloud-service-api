@@ -91,12 +91,12 @@ namespace iot_cloud_service_api.Services
             }
         }
         // Get daily average data
-        public async Task<Dictionary<DateTime, double>> GetAverageTempData(int period = 10, bool hourly = false)
+        public async Task<Dictionary<DateTime, Dictionary<String, double>>> GetAverageTempData(int period = 10, bool hourly = false)
         {
             var index = "tempdata";
 
             // Get the date limitation for the given period days ago (hourly or daily)
-            DateTime sinceTime = hourly ? DateTime.UtcNow.AddHours(-4) : DateTime.UtcNow.Date.AddDays(-period);
+            DateTime sinceTime = hourly ? DateTime.UtcNow.AddHours(-period) : DateTime.UtcNow.Date.AddDays(-period);
 
             // Perform the search with aggregation
             // Search between the given period
@@ -116,6 +116,9 @@ namespace iot_cloud_service_api.Services
                             .Average("period_temp_avg", avg => avg
                                 .Field(f => f.Temperature)
                             )
+                            .Average("period_humidity_avg", avg => avg
+                                .Field(f => f.Humidity)
+                            )
                         )
                     )
                 )
@@ -124,15 +127,27 @@ namespace iot_cloud_service_api.Services
             // Check if the search request was successful
             if (searchResponse.IsValid)
             {
-                var averages = new Dictionary<DateTime, double>();
+                // var tempAverage = new Dictionary<DateTime, double>();
+                // var humidityAverage = new Dictionary<DateTime, double>();
+                var averages = new Dictionary<DateTime, Dictionary<String, double>>();
 
                 // Extract the average temperatures from the aggregation results
                 var dateHistogram = searchResponse.Aggregations.DateHistogram("period_average");
                 
                 foreach (var dailyBucket in dateHistogram.Buckets)
                 {
+                    var tempDataAverage = new Dictionary<String, double>();
+
                     var avgTemperature = dailyBucket.Average("period_temp_avg");
-                    averages.Add(dailyBucket.Date, avgTemperature.Value ?? 0);
+                    var avgHumidity = dailyBucket.Average("period_humidity_avg");
+
+                    // tempAverage.Add(dailyBucket.Date, avgTemperature.Value ?? 0);
+                    // humidityAverage.Add(dailyBucket.Date, avgHumidity.Value ?? 0);
+                    tempDataAverage.Add("temperature", avgTemperature.Value ?? 0);
+                    tempDataAverage.Add("humidity", avgHumidity.Value ?? 0);
+                    averages.Add(dailyBucket.Date, tempDataAverage);
+
+
                 }
                 return averages;
             }
