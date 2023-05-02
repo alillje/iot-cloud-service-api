@@ -95,8 +95,19 @@ namespace iot_cloud_service_api.Services
         {
             var index = "tempdata";
 
+            // Limit the period to 30 days for daily average and 48 hours for hourly average
+            if (hourly) {
+                if (period > 48 || period <= 0) {
+                    period = 24;
+                }
+            } else {
+                if (period > 30 || period <= 0) {
+                    period = 10;
+                }
+            }
+
             // Get the date limitation for the given period days ago (hourly or daily)
-            DateTime sinceTime = hourly ? DateTime.UtcNow.AddHours(-period) : DateTime.UtcNow.Date.AddDays(-period);
+            DateTime sinceTime = hourly ? DateTime.UtcNow.AddHours(-period + 1) : DateTime.UtcNow.Date.AddDays(-period + 1);
 
             // Perform the search with aggregation
             // Search between the given period
