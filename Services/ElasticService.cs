@@ -124,6 +124,7 @@ namespace iot_cloud_service_api.Services
                         .Field(f => f.Timestamp)
                         .CalendarInterval(hourly ? DateInterval.Hour : DateInterval.Day)
                         .ExtendedBounds(sinceTime, DateTime.UtcNow)
+                        .Order(HistogramOrder.KeyDescending)
                         .Aggregations(aa => aa
                             .Average("period_temp_avg", avg => avg
                                 .Field(f => f.Temperature)
