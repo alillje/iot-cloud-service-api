@@ -28,6 +28,20 @@ builder.Services
 // Extract API keys from config to hashset for faster lookups
 var allowedApiKeys = new HashSet<string>(builder.Configuration.GetSection("ApiKeys").Get<string[]>());
 
+// Only allow requests from the specified client
+builder.Services.AddCors(options =>
+{
+    var allowedOrigins = builder.Configuration["Cors:AllowedClient"];
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .WithHeaders("Access-Control-Allow-Origin");
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -58,6 +72,16 @@ app.Use(async (context, next) =>
     }
 });
 
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+} else {
+    app.UseHttpsRedirection();
+}
+
+app.UseCors();
 
 app.UseAuthorization();
 
