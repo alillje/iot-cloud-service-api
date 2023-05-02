@@ -28,22 +28,19 @@ builder.Services
 // Extract API keys from config to hashset for faster lookups
 var allowedApiKeys = new HashSet<string>(builder.Configuration.GetSection("ApiKeys").Get<string[]>());
 
+builder.Services.AddCors(); // Add this line without configuration
+
 // Only allow requests from the specified client
-builder.Services.AddCors(options =>
-{
-    var allowedOrigins = builder.Configuration["Cors:AllowedClient"];
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            builder.WithOrigins(allowedOrigins)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .WithHeaders("Access-Control-Allow-Origin");
-        });
-});
+var allowedOrigins = builder.Configuration["Cors:AllowedClient"];
 
 var app = builder.Build();
 
+app.UseCors(builder => builder
+    .WithOrigins(allowedOrigins)
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials());
+    
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -81,7 +78,7 @@ if (app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-app.UseCors();
+// app.UseCors();
 
 app.UseAuthorization();
 
