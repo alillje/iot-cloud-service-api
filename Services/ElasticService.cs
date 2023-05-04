@@ -5,17 +5,24 @@ using iot_cloud_service_api.Models;
 
 namespace iot_cloud_service_api.Services
 {
+    /// <summary>
+    /// ElasticService is responsible for interacting with Elasticsearch to store and retrieve TempData data.
+    /// </summary>
     public class ElasticService : IElasticService
     {
         private readonly IElasticClient _elasticClient;
 
+        /// <summary>
+        /// Initializes a new instance of the ElasticService class.
+        /// </summary>
+        /// <param name="elasticClient">An instance of the IElasticClient interface for interacting with Elasticsearch.</param>
         public ElasticService(IElasticClient elasticClient)
         {
             _elasticClient = elasticClient;
         }
 
         /// <summary>
-        /// Retrieves a list of GithubRepo documents from Elasticsearch.
+        /// Retrieves a list of TempData documents from Elasticsearch.
         /// </summary>
         /// <returns>An IEnumerable of TempData objects.</returns>
         public async Task<IEnumerable<TempData>> GetAsync()
@@ -44,6 +51,11 @@ namespace iot_cloud_service_api.Services
             }
         }
 
+        /// <summary>
+        /// Adds a TempData object to Elasticsearch.
+        /// </summary>
+        /// <param name="tempData">The TempData object to be indexed in Elasticsearch.</param>
+        /// <returns>A Task representing the asynchronous operation.</returns>
         public async Task AddAsync(TempData tempData)
         {
             var index = "tempdata";
@@ -61,7 +73,10 @@ namespace iot_cloud_service_api.Services
             Console.Write("Successfully inserted data in Elasticsearch.");
         }
 
-        /// Gets the latest tempdata object
+        /// <summary>
+        /// Gets the latest TempData object from Elasticsearch.
+        /// </summary>
+        /// <returns>A Task with a result of the latest TempData object.</returns>
         public async Task<TempData> GetLatestAsync()
         {
             var index = "tempdata";
@@ -90,18 +105,30 @@ namespace iot_cloud_service_api.Services
                 throw new Exception($"Failed to get data from Elasticsearch. Error: {searchResponse.OriginalException?.Message}");
             }
         }
-        // Get daily average data
+
+        /// <summary>
+        /// Gets the average temperature and humidity data for a given period (in hours or days).
+        /// </summary>
+        /// <param name="period">The period to retrieve data for. Defaults to 10.</param>
+        /// <param name="hourly">A boolean indicating if the data should be retrieved hourly. Defaults to false.</param>
+        /// <returns>A Task with a result of a Dictionary containing DateTime keys and Dictionary values with temperature and humidity data.</returns>
+
         public async Task<Dictionary<DateTime, Dictionary<String, double>>> GetAverageTempData(int period = 10, bool hourly = false)
         {
             var index = "tempdata";
 
             // Limit the period to 30 days for daily average and 48 hours for hourly average
-            if (hourly) {
-                if (period > 48 || period <= 0) {
+            if (hourly)
+            {
+                if (period > 48 || period <= 0)
+                {
                     period = 24;
                 }
-            } else {
-                if (period > 30 || period <= 0) {
+            }
+            else
+            {
+                if (period > 30 || period <= 0)
+                {
                     period = 10;
                 }
             }
@@ -148,7 +175,7 @@ namespace iot_cloud_service_api.Services
 
                 // Extract the average temperatures from the aggregation results
                 var dateHistogram = searchResponse.Aggregations.DateHistogram("period_average");
-                
+
                 foreach (var dailyBucket in dateHistogram.Buckets)
                 {
                     // Create dictionary to store average temperature and humidity for each period
