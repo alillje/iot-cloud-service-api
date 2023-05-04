@@ -17,7 +17,7 @@ namespace iot_cloud_service_api.Services
         /// <summary>
         /// Retrieves a list of GithubRepo documents from Elasticsearch.
         /// </summary>
-        /// <returns>An IEnumerable of GithubRepo objects.</returns>
+        /// <returns>An IEnumerable of TempData objects.</returns>
         public async Task<IEnumerable<TempData>> GetAsync()
         {
             var index = "tempdata";
@@ -107,7 +107,7 @@ namespace iot_cloud_service_api.Services
             }
 
             // Get the date limitation for the given period days ago (hourly or daily)
-            DateTime sinceTime = hourly ? DateTime.UtcNow.AddHours(-period + 1) : DateTime.UtcNow.Date.AddDays(-period + 1);
+            DateTime sinceTime = hourly ? DateTime.UtcNow.AddHours(-period) : DateTime.UtcNow.Date.AddDays(-period);
 
             // Perform the search with aggregation
             // Search between the given period
@@ -123,7 +123,8 @@ namespace iot_cloud_service_api.Services
                     .DateHistogram("period_average", dh => dh
                         .Field(f => f.Timestamp)
                         .CalendarInterval(hourly ? DateInterval.Hour : DateInterval.Day)
-                        .ExtendedBounds(sinceTime, DateTime.UtcNow)
+                        // .ExtendedBounds(sinceTime, DateTime.UtcNow)
+                        .ExtendedBounds(sinceTime, DateTime.UtcNow.Add(hourly ? -TimeSpan.FromHours(1) : -TimeSpan.FromDays(1)))
                         .Order(HistogramOrder.KeyDescending)
                         .Aggregations(aa => aa
                             .Average("period_temp_avg", avg => avg
