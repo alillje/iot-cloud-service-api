@@ -151,7 +151,8 @@ namespace iot_cloud_service_api.Services
                         .Field(f => f.Timestamp)
                         .CalendarInterval(hourly ? DateInterval.Hour : DateInterval.Day)
                         // .ExtendedBounds(sinceTime, DateTime.UtcNow)
-                        .ExtendedBounds(sinceTime, DateTime.UtcNow.Add(hourly ? -TimeSpan.FromHours(1) : -TimeSpan.FromDays(1)))
+                        // .ExtendedBounds(sinceTime, DateTime.UtcNow.Add(hourly ? -TimeSpan.FromHours(1) : -TimeSpan.FromDays(1)))
+                        .ExtendedBounds(sinceTime, hourly ? DateTime.UtcNow.AddHours(-1) : DateTime.UtcNow.AddDays(-1))
                         .Order(HistogramOrder.KeyDescending)
                         .Aggregations(aa => aa
                             .Average("period_temp_avg", avg => avg
