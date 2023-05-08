@@ -139,6 +139,7 @@ namespace iot_cloud_service_api.Services
             // Perform the search with aggregation
             // Search between the given period
             // Add aggregations for both temperature and humidity
+            // Search within timespan - the previous day/hour and until 'sinceTime'
             var searchResponse = await _elasticClient.SearchAsync<TempData>(s => s
                 .Index(index)
                 .Size(0)
@@ -151,8 +152,6 @@ namespace iot_cloud_service_api.Services
                     .DateHistogram("period_average", dh => dh
                         .Field(f => f.Timestamp)
                         .CalendarInterval(hourly ? DateInterval.Hour : DateInterval.Day)
-                        // .ExtendedBounds(sinceTime, DateTime.UtcNow)
-                        // .ExtendedBounds(sinceTime, DateTime.UtcNow.Add(hourly ? -TimeSpan.FromHours(1) : -TimeSpan.FromDays(1)))
                         .ExtendedBounds(sinceTime, hourly ? DateTime.UtcNow.AddHours(-1) : DateTime.UtcNow.AddDays(-1))
                         .Order(HistogramOrder.KeyDescending)
                         .Aggregations(aa => aa
