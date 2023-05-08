@@ -145,6 +145,7 @@ namespace iot_cloud_service_api.Services
                 .Query(q => q.DateRange(r => r
                     .Field(f => f.Timestamp)
                     .GreaterThanOrEquals(sinceTime)
+                    .LessThanOrEquals(hourly ? DateTime.UtcNow.AddHours(-1) : DateTime.UtcNow.AddDays(-1))
                 ))
                 .Aggregations(a => a
                     .DateHistogram("period_average", dh => dh
