@@ -16,6 +16,7 @@ connectionSettings.ServerCertificateValidationCallback(CertificateValidations.Al
 var elasticClient = new ElasticClient(connectionSettings);
 
 // Add services to the container.
+builder.Services.AddHttpClient(); // This line registers IHttpClientFactory which provides HttpClient instances
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -23,7 +24,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services
     .AddSingleton<IElasticClient>(elasticClient)
-    .AddScoped<IElasticService, ElasticService>();
+    .AddScoped<IElasticService, AdafruitService>();
 
 // Extract API keys from config to hashset for faster lookups
 var allowedApiKeys = new HashSet<string>(builder.Configuration.GetSection("ApiKeys").Get<string[]>());
