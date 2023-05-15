@@ -6,14 +6,15 @@ using iot_cloud_service_api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionSettings = new ConnectionSettings(new Uri(builder.Configuration["ElasticSearch:Url"]));
-var password = builder.Configuration["ElasticSearch:Password"];
+// BELOW COMMENTED CODE ONLY VALID IF USING ELASTICSEARCH
+// var connectionSettings = new ConnectionSettings(new Uri(builder.Configuration["ElasticSearch:Url"]));
+// var password = builder.Configuration["ElasticSearch:Password"];
 
-connectionSettings.DisableDirectStreaming();
-connectionSettings.BasicAuthentication(builder.Configuration["ElasticSearch:User"], builder.Configuration["ElasticSearch:Password"]);
-connectionSettings.ServerCertificateValidationCallback(CertificateValidations.AllowAll);
+// connectionSettings.DisableDirectStreaming();
+// connectionSettings.BasicAuthentication(builder.Configuration["ElasticSearch:User"], builder.Configuration["ElasticSearch:Password"]);
+// connectionSettings.ServerCertificateValidationCallback(CertificateValidations.AllowAll);
 
-var elasticClient = new ElasticClient(connectionSettings);
+// var elasticClient = new ElasticClient(connectionSettings);
 
 // Add services to the container.
 builder.Services.AddHttpClient(); // This line registers IHttpClientFactory which provides HttpClient instances
@@ -23,8 +24,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services
-    .AddSingleton<IElasticClient>(elasticClient)
-    .AddScoped<IElasticService, AdafruitService>();
+    // .AddSingleton<IElasticClient>(elasticClient)
+    .AddScoped<IAdafruitService, AdafruitService>();
 
 // Extract API keys from config to hashset for faster lookups
 var allowedApiKeys = new HashSet<string>(builder.Configuration.GetSection("ApiKeys").Get<string[]>());
