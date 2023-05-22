@@ -37,10 +37,8 @@ namespace iot_cloud_service_api.Services
             {
                 // Set the header
                 _httpClient.DefaultRequestHeaders.Add("X-AIO-Key", _configuration["Adafruit:AdaFruitApiKey"]);
-                Console.WriteLine(_configuration["Adafruit:AdaFruitApiKey"]);
                 // Set the query string to limit results to the latest recorded data point
                 // var query = "/data?limit=1";
-                Console.WriteLine(_configuration["Adafruit:TemperatureFeedUrl"]);
                 // Make a request to Adafruit's API, temperature feed
                 // var tempResponse = await _httpClient.GetAsync($"{_configuration["Adafruit:TemperatureFeedUrl"]}{query}");
                 var tempResponse = await _httpClient.GetAsync(_configuration["Adafruit:TemperatureFeedUrl"]);
