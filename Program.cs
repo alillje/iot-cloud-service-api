@@ -1,20 +1,9 @@
-using Elasticsearch.Net;
-using Nest;
 using System.Text.Json;
 using iot_cloud_service_api.Interfaces;
 using iot_cloud_service_api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// BELOW COMMENTED CODE ONLY VALID IF USING ELASTICSEARCH
-// var connectionSettings = new ConnectionSettings(new Uri(builder.Configuration["ElasticSearch:Url"]));
-// var password = builder.Configuration["ElasticSearch:Password"];
-
-// connectionSettings.DisableDirectStreaming();
-// connectionSettings.BasicAuthentication(builder.Configuration["ElasticSearch:User"], builder.Configuration["ElasticSearch:Password"]);
-// connectionSettings.ServerCertificateValidationCallback(CertificateValidations.AllowAll);
-
-// var elasticClient = new ElasticClient(connectionSettings);
 
 // Add services to the container.
 builder.Services.AddHttpClient(); // This line registers IHttpClientFactory which provides HttpClient instances
