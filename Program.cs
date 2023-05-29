@@ -22,7 +22,7 @@ var allowedApiKeys = new HashSet<string>(builder.Configuration.GetSection("ApiKe
 builder.Services.AddCors(); // Add this line without configuration
 
 // Only allow requests from the specified client
-var allowedOrigins = builder.Configuration["Cors:AllowedClient"];
+var allowedOrigins = builder.Configuration["AllowedClient"];
 
 var app = builder.Build();
 

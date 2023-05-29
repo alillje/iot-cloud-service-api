@@ -36,12 +36,12 @@ namespace iot_cloud_service_api.Services
             try
             {
                 // Set the header
-                _httpClient.DefaultRequestHeaders.Add("X-AIO-Key", _configuration["Adafruit:AdaFruitApiKey"]);
+                _httpClient.DefaultRequestHeaders.Add("X-AIO-Key", _configuration["AdaFruitApiKey"]);
                 // Set the query string to limit results to the latest recorded data point
                 // var query = "/data?limit=1";
                 // Make a request to Adafruit's API, temperature feed
                 // var tempResponse = await _httpClient.GetAsync($"{_configuration["Adafruit:TemperatureFeedUrl"]}{query}");
-                var tempResponse = await _httpClient.GetAsync(_configuration["Adafruit:TemperatureFeedUrl"]);
+                var tempResponse = await _httpClient.GetAsync(_configuration["TemperatureFeedUrl"]);
 
                 if (!tempResponse.IsSuccessStatusCode)
                 {
@@ -50,7 +50,7 @@ namespace iot_cloud_service_api.Services
 
                 // Make a request to Adafruit's API, humidity feed
                 // var humResponse = await _httpClient.GetAsync($"{_configuration["Adafruit:HumidityFeedUrl"]}{query}");
-                var humResponse = await _httpClient.GetAsync(_configuration["Adafruit:HumidityFeedUrl"]);
+                var humResponse = await _httpClient.GetAsync(_configuration["HumidityFeedUrl"]);
 
                 // Ensure the request was successful
                 if (!humResponse.IsSuccessStatusCode)
