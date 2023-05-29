@@ -17,8 +17,7 @@ builder.Services
     .AddScoped<IAdafruitService, AdafruitService>();
 
 // Extract API keys from config to hashset for faster lookups
-var apiKeys = builder.Configuration?.GetSection("ApiKeys").Get<string[]>();
-var allowedApiKeys = apiKeys != null ? new HashSet<string>(apiKeys) : new HashSet<string>();
+var allowedApiKey = builder.Configuration["ApiKey"];
 
 builder.Services.AddCors(); // Add this line without configuration
 
@@ -49,7 +48,7 @@ app.Use(async (context, next) =>
 {
     var apiKey = context.Request.Headers["X-Api-Key"].FirstOrDefault();
 
-    if (string.IsNullOrEmpty(apiKey) || !allowedApiKeys.Contains(apiKey))
+    if (string.IsNullOrEmpty(apiKey) || !allowedApiKey.Equals(apiKey))
     {
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         context.Response.ContentType = "application/json";
