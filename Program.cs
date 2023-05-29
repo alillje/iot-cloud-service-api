@@ -17,7 +17,7 @@ builder.Services
     .AddScoped<IAdafruitService, AdafruitService>();
 
 // Extract API keys from config to hashset for faster lookups
-var allowedApiKeys = new HashSet<string>(builder.Configuration.GetSection("ApiKeys").Get<string[]>());
+var allowedApiKeys = new HashSet<string>(builder.Configuration?.GetSection("ApiKeys").Get<string[]>());
 
 builder.Services.AddCors(); // Add this line without configuration
 
