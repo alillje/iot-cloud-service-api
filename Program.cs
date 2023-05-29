@@ -16,12 +16,9 @@ builder.Services
     // .AddSingleton<IElasticClient>(elasticClient)
     .AddScoped<IAdafruitService, AdafruitService>();
 
-var apiKeys = builder.Configuration?.GetSection("ApiKeys").Get<string[]>();
-
-Console.WriteLine($"API Keys: {JsonSerializer.Serialize(apiKeys)}");
-
 // Extract API keys from config to hashset for faster lookups
-var allowedApiKeys = new HashSet<string>(apiKeys);
+var apiKeys = builder.Configuration?.GetSection("ApiKeys").Get<string[]>();
+var allowedApiKeys = apiKeys != null ? new HashSet<string>(apiKeys) : new HashSet<string>();
 
 builder.Services.AddCors(); // Add this line without configuration
 
